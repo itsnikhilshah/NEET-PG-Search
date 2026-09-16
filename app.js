@@ -218,42 +218,42 @@ function scheduleFilter() {
   renderTimer = window.setTimeout(() => applyFilters(), 90);
 }
 
-function positionCourseSuggestions() {
-  const rect = elements.course.getBoundingClientRect();
-  elements.courseSuggestions.style.left = `${rect.left}px`;
-  elements.courseSuggestions.style.top = `${rect.bottom + 6}px`;
-  elements.courseSuggestions.style.width = `${rect.width}px`;
-}
+const COURSE_SUGGESTION_LIMIT = 40;
 
 function closeCourseSuggestions() {
   elements.courseSuggestions.hidden = true;
   elements.courseSuggestions.innerHTML = "";
   elements.course.setAttribute("aria-expanded", "false");
   activeSuggestionIndex = -1;
-  window.removeEventListener("scroll", positionCourseSuggestions, true);
-  window.removeEventListener("resize", positionCourseSuggestions);
 }
 
 function openCourseSuggestions() {
   if (!allCourses.length) return;
   const query = elements.course.value.trim().toLocaleLowerCase();
-  const matches = (query
+  const matches = query
     ? allCourses.filter((course) => course.toLocaleLowerCase().includes(query))
-    : allCourses
-  ).slice(0, 8);
+    : allCourses;
+  const shown = matches.slice(0, COURSE_SUGGESTION_LIMIT);
+  const remaining = matches.length - shown.length;
 
-  elements.courseSuggestions.innerHTML = matches.length
-    ? matches
-        .map((course) => `<button type="button" class="autocomplete-option" role="option">${escapeHtml(course)}</button>`)
-        .join("")
-    : `<p class="autocomplete-empty">No matching courses</p>`;
+  if (!shown.length) {
+    elements.courseSuggestions.innerHTML = `<p class="course-suggestions-empty">No matching courses</p>`;
+  } else {
+    const buttons = shown
+      .map((course) => `<button type="button" class="course-suggestion" role="option">${escapeHtml(course)}</button>`)
+      .join("");
+    const hint = remaining > 0
+      ? `<p class="course-suggestions-hint">+${formatNumber.format(remaining)} more — keep typing to narrow it down</p>`
+      : "";
+    elements.courseSuggestions.innerHTML = buttons + hint;
+  }
 
   activeSuggestionIndex = -1;
   elements.courseSuggestions.hidden = false;
   elements.course.setAttribute("aria-expanded", "true");
-  positionCourseSuggestions();
-  window.addEventListener("scroll", positionCourseSuggestions, true);
-  window.addEventListener("resize", positionCourseSuggestions);
+  requestAnimationFrame(() => {
+    elements.courseSuggestions.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  });
 }
 
 function selectCourse(value) {
@@ -263,7 +263,7 @@ function selectCourse(value) {
 }
 
 function highlightSuggestion(delta) {
-  const options = [...elements.courseSuggestions.querySelectorAll(".autocomplete-option")];
+  const options = [...elements.courseSuggestions.querySelectorAll(".course-suggestion")];
   if (!options.length) return;
   activeSuggestionIndex = (activeSuggestionIndex + delta + options.length) % options.length;
   options.forEach((option, index) => option.classList.toggle("is-active", index === activeSuggestionIndex));
@@ -288,7 +288,7 @@ function wireEvents() {
       event.preventDefault();
       highlightSuggestion(-1);
     } else if (event.key === "Enter") {
-      const options = [...elements.courseSuggestions.querySelectorAll(".autocomplete-option")];
+      const options = [...elements.courseSuggestions.querySelectorAll(".course-suggestion")];
       if (!elements.courseSuggestions.hidden && activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
         event.preventDefault();
         selectCourse(options[activeSuggestionIndex].textContent);
@@ -299,14 +299,15 @@ function wireEvents() {
       closeCourseSuggestions();
     }
   });
-  elements.courseSuggestions.addEventListener("pointerdown", (event) => {
-    const option = event.target.closest(".autocomplete-option");
+  elements.courseSuggestions.addEventListener("click", (event) => {
+    const option = event.target.closest(".course-suggestion");
     if (!option) return;
-    event.preventDefault();
     selectCourse(option.textContent);
   });
   document.addEventListener("pointerdown", (event) => {
-    if (!event.target.closest(".autocomplete")) closeCourseSuggestions();
+    if (!event.target.closest("#course-filter") && !event.target.closest("#course-suggestions")) {
+      closeCourseSuggestions();
+    }
   });
   elements.clear.addEventListener("click", clearFilters);
   elements.emptyClear.addEventListener("click", clearFilters);

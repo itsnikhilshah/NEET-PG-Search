@@ -46,19 +46,17 @@
           </label>
           <label>
             <span>Course</span>
-            <div class="autocomplete">
-              <input
-                id="course-filter"
-                placeholder="Any course"
-                autocomplete="off"
-                role="combobox"
-                aria-expanded="false"
-                aria-autocomplete="list"
-                aria-controls="course-suggestions"
-              />
-              <div class="autocomplete-list" id="course-suggestions" role="listbox" hidden></div>
-            </div>
+            <input
+              id="course-filter"
+              placeholder="Any course"
+              autocomplete="off"
+              role="combobox"
+              aria-expanded="false"
+              aria-autocomplete="list"
+              aria-controls="course-suggestions"
+            />
           </label>
+          <div class="course-suggestions" id="course-suggestions" role="listbox" hidden></div>
           <label>
             <span>State</span>
             <select id="state-filter"><option value="">All states</option></select>
