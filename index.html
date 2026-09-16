@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Search NEET-PG 2025 Round 1 allotments by institution, course, state, quota, category, and rank." />
+    <meta name="theme-color" content="#16255b" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316255b'/%3E%3Cpath d='M18 20h28v7H18zm0 13h20v7H18zm0 13h13v7H18z' fill='%23fff'/%3E%3Ccircle cx='46' cy='46' r='10' fill='%23ff8066'/%3E%3Cpath d='m42 46 3 3 6-7' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <title>Cutoff Atlas — NEET-PG Rank Explorer</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Cutoff Atlas home">
+        <span class="brand-mark" aria-hidden="true">CA</span>
+        <span>
+          <strong>Cutoff Atlas</strong>
+          <small>NEET-PG rank explorer</small>
+        </span>
+      </a>
+      <span class="round-pill" id="round-pill">2025 counselling</span>
+    </header>
+
+    <main>
+      <section class="search-panel" aria-labelledby="search-title">
+        <div class="search-intro">
+          <div>
+            <p class="eyebrow">Find where your rank could take you</p>
+            <h1 id="search-title">Search every allotment, without wrestling a PDF.</h1>
+          </div>
+          <p class="source-summary" id="source-summary">Loading counselling data…</p>
+        </div>
+
+        <label class="primary-search" for="search-input">
+          <span class="search-icon" aria-hidden="true"></span>
+          <input
+            id="search-input"
+            type="search"
+            autocomplete="off"
+            placeholder="Search Grant Medical College, general surgery, Maharashtra…"
+          />
+          <kbd>/</kbd>
+        </label>
+
+        <div class="filters" id="filters">
+          <label>
+            <span>Round</span>
+            <select id="round-filter"><option value="">All rounds</option></select>
+          </label>
+          <label>
+            <span>Course</span>
+            <input id="course-filter" list="course-options" placeholder="Any course" autocomplete="off" />
+            <datalist id="course-options"></datalist>
+          </label>
+          <label>
+            <span>State</span>
+            <select id="state-filter"><option value="">All states</option></select>
+          </label>
+          <label>
+            <span>Quota</span>
+            <select id="quota-filter"><option value="">All quotas</option></select>
+          </label>
+          <label>
+            <span>Seat category</span>
+            <select id="category-filter"><option value="">All categories</option></select>
+          </label>
+          <label>
+            <span>Closing rank from</span>
+            <input id="rank-min" type="number" inputmode="numeric" min="1" placeholder="1" />
+          </label>
+          <label>
+            <span>Closing rank to</span>
+            <input id="rank-max" type="number" inputmode="numeric" min="1" placeholder="Any rank" />
+          </label>
+        </div>
+
+        <div class="filter-actions">
+          <button class="text-button" id="clear-filters" type="button">Clear all</button>
+          <label class="sort-control">
+            <span>Sort</span>
+            <select id="sort-filter">
+              <option value="round-desc">Latest round first</option>
+              <option value="closing-asc">Closing rank: low to high</option>
+              <option value="closing-desc">Closing rank: high to low</option>
+              <option value="name-asc">Institution: A to Z</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="results-section" aria-live="polite" aria-busy="true" id="results-section">
+        <div class="results-heading">
+          <div>
+            <p class="eyebrow">Rank ranges</p>
+            <h2 id="result-count">Loading results…</h2>
+          </div>
+          <p>Opening and closing ranks are observed allotments, not guaranteed future cutoffs.</p>
+        </div>
+
+        <div class="results-table" role="table" aria-label="Counselling rank ranges">
+          <div class="table-head" role="row">
+            <span role="columnheader">Institution &amp; course</span>
+            <span role="columnheader">Quota</span>
+            <span role="columnheader">Category</span>
+            <span role="columnheader">Round-wise rank range</span>
+          </div>
+          <div id="results" class="result-rows"></div>
+        </div>
+
+        <div class="empty-state" id="empty-state" hidden>
+          <span aria-hidden="true">⌁</span>
+          <h3>No matching rank ranges</h3>
+          <p>Try a shorter search or clear one of the filters.</p>
+          <button class="primary-button" id="empty-clear" type="button">Clear filters</button>
+        </div>
+
+        <nav class="pagination" aria-label="Results pages" id="pagination" hidden>
+          <button id="previous-page" type="button">Previous</button>
+          <span id="page-status"></span>
+          <button id="next-page" type="button">Next</button>
+        </nav>
+      </section>
+    </main>
+
+    <footer>
+      <p>Based on the MCC NEET-PG Counselling Seats Allotment 2025 Round 1 list.</p>
+      <p>Always verify choices against the official counselling documents.</p>
+    </footer>
+  </body>
+</html>

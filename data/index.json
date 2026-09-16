@@ -1,0 +1,13 @@
+{
+  "exam": "NEET-PG",
+  "cycle": "2025",
+  "rounds": [
+    {
+      "id": "2025-round-1",
+      "label": "Round 1",
+      "shortLabel": "R1",
+      "order": 1,
+      "file": "./data/2025-round-1.json"
+    }
+  ]
+}
