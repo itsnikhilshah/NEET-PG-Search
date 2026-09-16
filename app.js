@@ -4,7 +4,7 @@ const elements = {
   search: document.querySelector("#search-input"),
   round: document.querySelector("#round-filter"),
   course: document.querySelector("#course-filter"),
-  courseOptions: document.querySelector("#course-options"),
+  courseSuggestions: document.querySelector("#course-suggestions"),
   state: document.querySelector("#state-filter"),
   quota: document.querySelector("#quota-filter"),
   category: document.querySelector("#category-filter"),
@@ -26,9 +26,11 @@ const elements = {
 };
 
 let allPrograms = [];
+let allCourses = [];
 let filteredPrograms = [];
 let currentPage = 1;
 let renderTimer;
+let activeSuggestionIndex = -1;
 
 const formatNumber = new Intl.NumberFormat("en-IN");
 
@@ -206,6 +208,7 @@ function clearFilters() {
   elements.rankMin.value = "";
   elements.rankMax.value = "";
   elements.sort.value = "round-desc";
+  closeCourseSuggestions();
   applyFilters();
   elements.search.focus();
 }
@@ -215,12 +218,95 @@ function scheduleFilter() {
   renderTimer = window.setTimeout(() => applyFilters(), 90);
 }
 
+function positionCourseSuggestions() {
+  const rect = elements.course.getBoundingClientRect();
+  elements.courseSuggestions.style.left = `${rect.left}px`;
+  elements.courseSuggestions.style.top = `${rect.bottom + 6}px`;
+  elements.courseSuggestions.style.width = `${rect.width}px`;
+}
+
+function closeCourseSuggestions() {
+  elements.courseSuggestions.hidden = true;
+  elements.courseSuggestions.innerHTML = "";
+  elements.course.setAttribute("aria-expanded", "false");
+  activeSuggestionIndex = -1;
+  window.removeEventListener("scroll", positionCourseSuggestions, true);
+  window.removeEventListener("resize", positionCourseSuggestions);
+}
+
+function openCourseSuggestions() {
+  if (!allCourses.length) return;
+  const query = elements.course.value.trim().toLocaleLowerCase();
+  const matches = (query
+    ? allCourses.filter((course) => course.toLocaleLowerCase().includes(query))
+    : allCourses
+  ).slice(0, 8);
+
+  elements.courseSuggestions.innerHTML = matches.length
+    ? matches
+        .map((course) => `<button type="button" class="autocomplete-option" role="option">${escapeHtml(course)}</button>`)
+        .join("")
+    : `<p class="autocomplete-empty">No matching courses</p>`;
+
+  activeSuggestionIndex = -1;
+  elements.courseSuggestions.hidden = false;
+  elements.course.setAttribute("aria-expanded", "true");
+  positionCourseSuggestions();
+  window.addEventListener("scroll", positionCourseSuggestions, true);
+  window.addEventListener("resize", positionCourseSuggestions);
+}
+
+function selectCourse(value) {
+  elements.course.value = value;
+  closeCourseSuggestions();
+  applyFilters();
+}
+
+function highlightSuggestion(delta) {
+  const options = [...elements.courseSuggestions.querySelectorAll(".autocomplete-option")];
+  if (!options.length) return;
+  activeSuggestionIndex = (activeSuggestionIndex + delta + options.length) % options.length;
+  options.forEach((option, index) => option.classList.toggle("is-active", index === activeSuggestionIndex));
+  options[activeSuggestionIndex].scrollIntoView({ block: "nearest" });
+}
+
 function wireEvents() {
   [elements.search, elements.course, elements.rankMin, elements.rankMax].forEach((input) => {
     input.addEventListener("input", scheduleFilter);
   });
   [elements.round, elements.state, elements.quota, elements.category, elements.sort].forEach((select) => {
     select.addEventListener("change", () => applyFilters());
+  });
+  elements.course.addEventListener("input", openCourseSuggestions);
+  elements.course.addEventListener("focus", openCourseSuggestions);
+  elements.course.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (elements.courseSuggestions.hidden) openCourseSuggestions();
+      else highlightSuggestion(1);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      highlightSuggestion(-1);
+    } else if (event.key === "Enter") {
+      const options = [...elements.courseSuggestions.querySelectorAll(".autocomplete-option")];
+      if (!elements.courseSuggestions.hidden && activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+        event.preventDefault();
+        selectCourse(options[activeSuggestionIndex].textContent);
+      } else {
+        closeCourseSuggestions();
+      }
+    } else if (event.key === "Escape") {
+      closeCourseSuggestions();
+    }
+  });
+  elements.courseSuggestions.addEventListener("pointerdown", (event) => {
+    const option = event.target.closest(".autocomplete-option");
+    if (!option) return;
+    event.preventDefault();
+    selectCourse(option.textContent);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest(".autocomplete")) closeCourseSuggestions();
   });
   elements.clear.addEventListener("click", clearFilters);
   elements.emptyClear.addEventListener("click", clearFilters);
@@ -271,7 +357,7 @@ async function loadData() {
     addOptions(elements.state, states);
     addOptions(elements.quota, quotas);
     addOptions(elements.category, categories);
-    addOptions(elements.courseOptions, courses);
+    allCourses = courses;
     elements.roundPill.textContent = `${manifest.cycle} · ${rounds.length} round${rounds.length === 1 ? "" : "s"}`;
     elements.sourceSummary.textContent = `${formatNumber.format(sourceRows)} allotments across ${rounds.length} round${rounds.length === 1 ? "" : "s"}, grouped into searchable programs.`;
     applyFilters();

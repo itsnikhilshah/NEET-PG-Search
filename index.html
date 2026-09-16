@@ -13,11 +13,7 @@
   <body>
     <header class="site-header">
       <a class="brand" href="#" aria-label="Cutoff Atlas home">
-        <span class="brand-mark" aria-hidden="true">CA</span>
-        <span>
-          <strong>Cutoff Atlas</strong>
-          <small>NEET-PG rank explorer</small>
-        </span>
+        <strong>NEET-PG Rank Explorer</strong>
       </a>
       <span class="round-pill" id="round-pill">2025 counselling</span>
     </header>
@@ -50,8 +46,18 @@
           </label>
           <label>
             <span>Course</span>
-            <input id="course-filter" list="course-options" placeholder="Any course" autocomplete="off" />
-            <datalist id="course-options"></datalist>
+            <div class="autocomplete">
+              <input
+                id="course-filter"
+                placeholder="Any course"
+                autocomplete="off"
+                role="combobox"
+                aria-expanded="false"
+                aria-autocomplete="list"
+                aria-controls="course-suggestions"
+              />
+              <div class="autocomplete-list" id="course-suggestions" role="listbox" hidden></div>
+            </div>
           </label>
           <label>
             <span>State</span>

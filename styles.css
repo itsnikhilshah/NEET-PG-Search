@@ -53,22 +53,7 @@ button, select { cursor: pointer; }
   text-decoration: none;
 }
 
-.brand-mark {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  color: #fff;
-  background: var(--navy);
-  font-weight: 850;
-  letter-spacing: -0.04em;
-  box-shadow: 4px 4px 0 var(--coral);
-}
-
-.brand strong, .brand small { display: block; }
-.brand strong { font-size: 1.05rem; letter-spacing: -0.02em; }
-.brand small { color: var(--muted); font-size: 0.78rem; }
+.brand strong { display: block; font-size: 1.05rem; letter-spacing: -0.02em; }
 
 .round-pill {
   color: var(--navy);
@@ -240,6 +225,47 @@ kbd {
 
 .filters input:focus, .filters select:focus, .sort-control select:focus {
   box-shadow: 0 0 0 3px rgba(159, 176, 255, 0.28);
+}
+
+.autocomplete { position: relative; }
+
+.autocomplete-list {
+  position: fixed;
+  z-index: 60;
+  max-height: min(260px, 50vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 14px 36px rgba(23, 32, 64, 0.18);
+}
+
+.autocomplete-option {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.autocomplete-option:hover,
+.autocomplete-option.is-active {
+  background: var(--blue-soft);
+}
+
+.autocomplete-empty {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 .filter-actions {
